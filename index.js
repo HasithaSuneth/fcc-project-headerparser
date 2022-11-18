@@ -5,6 +5,14 @@
 require('dotenv').config();
 var express = require('express');
 var app = express();
+const requestIp = require('request-ip');
+
+// inside middleware handler
+var ipMiddleware = function(req, res, next) {
+ const clientIp = requestIp.getClientIp(req); 
+ next();
+};
+app.use(requestIp.mw());
 
 // enable CORS (https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
 // so that your API is remotely testable by FCC
@@ -17,6 +25,17 @@ app.use(express.static('public'));
 // http://expressjs.com/en/starter/basic-routing.html
 app.get('/', function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
+});
+
+app.get('/api/whoami', (req, res) => {
+  var ipaddress = req.clientIp;
+  var language = req.acceptsLanguages();
+  var software=req.get('User-Agent');
+   res.json({
+     ipaddress: ipaddress,
+     language:language[0],
+     software:software
+   });
 });
 
 // your first API endpoint...
